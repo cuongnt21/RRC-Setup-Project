@@ -9,3 +9,7 @@ client:
 server:
 	g++ eNB.cpp -o server
 	./server
+
+all:
+	g++ main.cpp -o main -pthread
+	./main
