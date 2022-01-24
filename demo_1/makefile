@@ -2,7 +2,7 @@ INCLUDE_DIR += -I./lib
 
 SRC += ./lib/*.cpp
 
-OPT = -pthread
+OPT = -pthread -w
 
 APPNAME = main
 

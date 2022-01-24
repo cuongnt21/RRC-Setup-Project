@@ -6,17 +6,11 @@ using namespace std;
 
 int main(){
     pthread_t thread1, thread2;
-
-    UE myUE;
-    eNB myeNB;
     baseDevice *p;
-    
-    // UE* p2 = &myUE;
-    p = &myUE;
-    pthread_create(&thread2, NULL, tRcConnectionEstablish, p);
 
-    // eNB* p1 = &myeNB;
-    p = &myeNB;
+    p = new UE();
+    pthread_create(&thread2, NULL, tRcConnectionEstablish, p);
+    p = new eNB();
     pthread_create(&thread1, NULL, tListenSignal, p);
 
     pthread_exit(NULL);
