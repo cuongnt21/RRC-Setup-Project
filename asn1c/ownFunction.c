@@ -9,7 +9,7 @@ static int save_to_file(const void *data, size_t size, void *key) {
 
 unsigned char * Message_encode(RRCMessage_t *rect){
     asn_enc_rval_t er;
-    static unsigned char buffer[1024];
+    unsigned char buffer[1024];
     for(int i = 0; i<1024; i++){
         buffer[i] = 0;
     }
@@ -35,7 +35,13 @@ unsigned char * Message_encode(RRCMessage_t *rect){
     
     printMess(buffer, er.encoded);
 
-    return &buffer;
+    unsigned char * temp;
+    temp = (unsigned char*) malloc(1024 * sizeof(unsigned char));
+    for(int i=0; i<1024; i++){
+        *(temp + i) = buffer[i];
+    }
+
+    return temp;
 }
 
 RRCMessage_t * addData(RRCMessage_t * mess){

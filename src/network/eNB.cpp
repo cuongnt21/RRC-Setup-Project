@@ -37,9 +37,9 @@ void eNB::listenSignal(){
     
     // Decode
     unsigned char *p = &received_buffer[0];
-    RRCMessage_t *mess_recei = new RRCMessage_t();
+    RRCMessage_t *mess_rcv = new RRCMessage_t();
     asn_dec_rval_t rval;
-    rval = ber_decode(0, &asn_DEF_RRCMessage, (void **)&mess_recei, p, 1024);
+    rval = ber_decode(0, &asn_DEF_RRCMessage, (void **)&mess_rcv, p, 1024);
     if(rval.code != RC_OK) {
         cout << "eNB: Broken encoding" << endl;
         return;
@@ -49,25 +49,29 @@ void eNB::listenSignal(){
     }
 
     // Check the messid
-    if (mess_recei->messid == ID_rrcSetupRequest){
+    if (mess_rcv->messid == ID_rrcSetupRequest){
         rrcMethod();
     } else{
         cout << "eNB: Dont know that packet" << endl;
     }
     // Close
+    delete mess_rcv;
     close(com_socket);
 }
 
 void eNB::rrcMethod(){
      // Send the RRC connection setup
     RRCMessage_t *mess = new RRCMessage_t();
+    unsigned char *p;
     mess = addData(mess);
     mess->messid = ID_rrcSetup;
-    unsigned char *p;
     p = Message_encode(mess);
     for(int i=0; i<1024; i++){
         sent_buffer[i] = *(p+i);
     }
+    free(p);
+    delete mess;
+    mess = nullptr;
 
     send(com_socket, sent_buffer, sizeof(sent_buffer), 0);
     cout << "eNB: Send RRC Connection Setup" << endl;;
@@ -78,10 +82,10 @@ void eNB::rrcMethod(){
     cout << "eNB: Receive packet successfully" << endl;   
     p = &received_buffer[0];
     
-    RRCMessage_t *mess_recei = new RRCMessage_t();
+    RRCMessage_t *mess_rcv = new RRCMessage_t();
     asn_dec_rval_t rval;
 
-    rval = ber_decode(0, &asn_DEF_RRCMessage, (void **)&mess_recei, p, 1024);
+    rval = ber_decode(0, &asn_DEF_RRCMessage, (void **)&mess_rcv, p, 1024);
     if(rval.code != RC_OK) {
         cout << "eNB: Broken encoding" << endl;
         return;
@@ -90,11 +94,14 @@ void eNB::rrcMethod(){
         printMess(received_buffer, 24);
     }
     
-    if (mess_recei->messid == ID_rrcSetupComplete){
+    if (mess_rcv->messid == ID_rrcSetupComplete){
         cout << "eNB: RRC Setup Complete => EXIT()" << endl;
     } else{
         cout << "eNB: Dont know that packet" << endl;
     }
+    delete mess_rcv;
+
+
     return;
     // Process
 }
